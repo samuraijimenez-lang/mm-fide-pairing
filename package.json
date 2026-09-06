@@ -1,0 +1,8 @@
+{
+  "name": "mm-fide-pairing-service",
+  "version": "1.0.0",
+  "description": "Servicio HTTP de emparejamiento FIDE (Dutch/Burstein) sobre bbpPairings, para Movimiento Maestro",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "license": "AGPL-3.0"
+}

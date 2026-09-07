@@ -2,7 +2,7 @@
 # Etapa 1: compilar bbpPairings desde el código fuente (motor abierto, C++).
 FROM gcc:13 AS build
 RUN git clone --depth 1 https://github.com/BieremaBoyzProgramming/bbpPairings /src \
-    && cd /src && make
+    && cd /src && make static=yes
 # Etapa 2: runtime mínimo con Node.
 FROM node:20-slim
 WORKDIR /app

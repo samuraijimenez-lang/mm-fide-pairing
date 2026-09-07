@@ -12,6 +12,16 @@ const PORT   = process.env.PORT || 8080;
 const APIKEY = process.env.API_KEY || '';           // si se define, se exige
 const BIN    = path.join(__dirname, 'bbpPairings');
 
+// ⭐ Red de seguridad: un error no capturado NUNCA debe tumbar todo el proceso
+// (eso es lo que causaba los 502 — ver fix más abajo en req.on('end', ...)).
+// Esto es un respaldo adicional por si aparece algún otro caso no previsto.
+process.on('uncaughtException', (e) => {
+  console.error('uncaughtException (proceso sigue vivo):', e);
+});
+process.on('unhandledRejection', (e) => {
+  console.error('unhandledRejection (proceso sigue vivo):', e);
+});
+
 function pair(trf, system) {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'pair-'));
   try {
@@ -43,13 +53,15 @@ http.createServer((req, res) => {
   let body = '';
   req.on('data', c => { body += c; if (body.length > 2e6) req.destroy(); });
   req.on('end', () => {
+    let result;
     try {
       const sys = (new URL(req.url, 'http://x').searchParams.get('system')) || 'dutch';
-      res.writeHead(200, {'content-type':'application/json'});
-      res.end(JSON.stringify(pair(body, sys)));
+      result = pair(body, sys);
     } catch (e) {
       res.writeHead(400, {'content-type':'application/json'});
-      res.end(JSON.stringify({ ok:false, error: String(e.stderr || e.message || e) }));
+      return res.end(JSON.stringify({ ok:false, error: String(e.stderr || e.message || e) }));
     }
+    res.writeHead(200, {'content-type':'application/json'});
+    res.end(JSON.stringify(result));
   });
 }).listen(PORT, () => console.log('FIDE pairing service on :' + PORT));

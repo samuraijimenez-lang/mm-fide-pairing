@@ -7,6 +7,7 @@ RUN git clone --depth 1 https://github.com/BieremaBoyzProgramming/bbpPairings /s
 FROM node:20-slim
 WORKDIR /app
 COPY --from=build /src/bbpPairings.exe /app/bbpPairings
+RUN chmod +x /app/bbpPairings
 COPY server.js /app/server.js
 ENV PORT=8080
 EXPOSE 8080
